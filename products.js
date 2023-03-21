@@ -1,3 +1,10 @@
+const storesData = {
+  "stores": [
+    "https://mybacs.com",
+    "https://www.on-vacation.club"
+  ]
+}
+
 // Product class
 class Product {
   constructor(title, price, imageLink, description) {
@@ -54,8 +61,8 @@ async function fetchAvailableProducts(storeUrl) {
 
 // Main function to fetch available products from all Shopify stores in products.json
 async function fetchProductsFromStores() {
-  const storesResponse = await fetch("https://cdn.jsdelivr.net/gh/sfaist/bodega_web@main/products.json");
-  const storesData = await storesResponse.json();
+  //const storesResponse = await fetch("https://cdn.jsdelivr.net/gh/sfaist/bodega_web@main/products.json");
+  //const storesData = await storesResponse.json();
   const stores = storesData.stores;
 
   const allProducts = [];
