@@ -1,6 +1,6 @@
 $(document).ready(async function () {
   const products = await fetchProductsFromStores();
-  const itemsPerPage = 25;
+  const itemsPerPage = 10;
   let currentPage = 1;
 
   const $template = $(".availabletemplate");
@@ -23,7 +23,11 @@ $(document).ready(async function () {
   }
 
   function isScrolledToBottom() {
-    return $(window).scrollTop() + $(window).height() >= $(document).height();
+    let container =$("#availableProducts");
+    console.log($("#availableProducts").scrollTop());
+    console.log($("#availableProducts").height());
+    console.log(container.prop("scrollHeight"));
+    return container.scrollTop() + container.height() >= container.prop("scrollHeight");
   }
 
   function hasMorePages() {
@@ -40,5 +44,5 @@ $(document).ready(async function () {
   renderProducts(products, currentPage);
   $template.hide();
 
-  $(window).on("scroll", handleScroll);
+  $("#availableProducts").on("scroll", handleScroll);
 });
