@@ -3,7 +3,7 @@ $(document).ready(async function () {
   const itemsPerPage = 25;
   let currentPage = 1;
 
-  const $template = $(".availableTemplate");
+  const $template = $(".availabletemplate");
   const $parent = $template.parent();
 
   function renderProducts(products, page) {
@@ -11,7 +11,7 @@ $(document).ready(async function () {
     const endIndex = startIndex + itemsPerPage;
 
     products.slice(startIndex, endIndex).forEach((product) => {
-      const $productItem = $template.clone().removeClass("availableTemplate");
+      const $productItem = $template.clone().removeClass("availabletemplate");
 
       $productItem.find(".p_title").text(product.title);
       $productItem.find(".p_price").text(`$${product.price}`);
