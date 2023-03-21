@@ -1,10 +1,3 @@
-const storesData = {
-  "stores": [
-    "https://mybacs.com",
-    "https://www.on-vacation.club"
-  ]
-}
-
 // Product class
 class Product {
   constructor(title, price, imageLink, description) {
@@ -18,15 +11,13 @@ class Product {
 // Function to fetch available products from a Shopify store with pagination
 async function fetchAvailableProducts(storeUrl) {
   const placeholderImage = "https://via.placeholder.com/150";
-  let sinceId = 0;
+  let page = 1;
   let hasNextPage = true;
   let availableProducts = [];
 
   while (hasNextPage) {
     try {
-      const productsUrl = sinceId==0?
-          `${storeUrl}/products.json`:
-          `${storeUrl}/products.json?since_id=${sinceId}`;
+      const productsUrl = `${storeUrl}/products.json?page=${page}`;
       const response = await fetch(productsUrl);
       const data = await response.json();
 
@@ -49,7 +40,7 @@ async function fetchAvailableProducts(storeUrl) {
         });
 
       availableProducts = [...availableProducts, ...products];
-      sinceId = data.products[data.products.length - 1].id;
+      page = page+1;
     } catch (error) {
       console.error("Error fetching products:", error);
       hasNextPage = false;
@@ -61,8 +52,8 @@ async function fetchAvailableProducts(storeUrl) {
 
 // Main function to fetch available products from all Shopify stores in products.json
 async function fetchProductsFromStores() {
-  //const storesResponse = await fetch("https://cdn.jsdelivr.net/gh/sfaist/bodega_web@main/products.json");
-  //const storesData = await storesResponse.json();
+  const storesResponse = await fetch("https://cdn.jsdelivr.net/gh/sfaist/bodega_web@main/stores.json");
+  const storesData = await storesResponse.json();
   const stores = storesData.stores;
 
   const allProducts = [];
@@ -76,4 +67,4 @@ async function fetchProductsFromStores() {
 }
 
 // Fetch and log available products
-fetchProductsFromStores().then((products) => console.log(products));  
+//fetchProductsFromStores().then((products) => console.log(products));  
