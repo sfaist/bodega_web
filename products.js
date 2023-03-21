@@ -52,8 +52,7 @@ async function fetchAvailableProducts(storeUrl) {
 
 // Main function to fetch available products from all Shopify stores in products.json
 async function fetchProductsFromStores() {
-  const storesResponse = await fetch("./stores.json");
-  const storesData = await storesResponse.json();
+  //requires stores.js to be loaded
   const stores = storesData.stores;
 
   const allProducts = [];
