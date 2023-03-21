@@ -52,7 +52,7 @@ async function fetchAvailableProducts(storeUrl) {
 
 // Main function to fetch available products from all Shopify stores in products.json
 async function fetchProductsFromStores() {
-  const storesResponse = await fetch("https://cdn.jsdelivr.net/gh/sfaist/bodega_web@main/stores.json");
+  const storesResponse = await fetch("./stores.json");
   const storesData = await storesResponse.json();
   const stores = storesData.stores;
 
