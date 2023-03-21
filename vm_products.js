@@ -5,6 +5,8 @@ $(document).ready(async function () {
 
   const $template = $(".availabletemplate");
   const $parent = $template.parent();
+  const $loadingMore = $('<div class="loading-more">Loading more...</div>').appendTo($parent);
+  $template.hide();
 
   function renderProducts(products, page) {
     const startIndex = (page - 1) * itemsPerPage;
@@ -23,11 +25,8 @@ $(document).ready(async function () {
   }
 
   function isScrolledToBottom() {
-    let container =$("#availableProducts");
-    console.log($("#availableProducts").scrollTop());
-    console.log($("#availableProducts").height());
-    console.log(container.prop("scrollHeight"));
-    return container.scrollTop() + container.height() >= container.prop("scrollHeight");
+    let container = $("#availableProducts");
+    return container.scrollTop() + container.height() >= container.prop("scrollHeight") - $loadingMore.height();
   }
 
   function hasMorePages() {
@@ -36,13 +35,15 @@ $(document).ready(async function () {
 
   function handleScroll() {
     if (isScrolledToBottom() && hasMorePages()) {
+      $loadingMore.show();
       currentPage++;
       renderProducts(products, currentPage);
+      $loadingMore.hide();
     }
   }
 
   renderProducts(products, currentPage);
-  $template.hide();
+  $loadingMore.hide();
 
   $("#availableProducts").on("scroll", handleScroll);
 });
