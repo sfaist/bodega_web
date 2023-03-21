@@ -16,7 +16,7 @@ $(document).ready(async function () {
       $productItem.find(".p_title").text(product.title);
       $productItem.find(".p_price").text(`$${product.price}`);
       $productItem.find(".p_image-link").attr("src", product.imageLink);
-      $productItem.find(".p_description").html(product.description);
+      $productItem.find(".p_store").html(product.store);
 
       $parent.append($productItem);
     });
