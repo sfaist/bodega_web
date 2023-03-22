@@ -1,10 +1,11 @@
 // Product class
 class Product {
-  constructor(title, price, imageLink, store) {
+  constructor(title, price, imageLink, store, url) {
     this.title = title;
     this.price = price;
     this.imageLink = imageLink;
     this.store = store;
+    this.url = url;
   }
 }
 
@@ -35,7 +36,8 @@ async function fetchAvailableProducts(storeUrl) {
             product.title,
             product.variants[0].price,
             imageLink,
-            product.productsUrl
+            productsUrl.split('/')[2],
+            productsUrl
           );
         });
 
