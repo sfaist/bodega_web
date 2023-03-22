@@ -1,6 +1,7 @@
 
 $(document).ready(async function () {
-  activeProducts = await fetchActiveProducts();
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  const activeProducts = await fetchActiveProducts();
   const $activeTemplate = $("#activeTemplate");
   const $activeContainer = $("#activeProducts");
 
@@ -16,6 +17,7 @@ $(document).ready(async function () {
       $productItem.find(".p_link").attr("href", product.url);
       $productItem.show();
     });
+    
   }
   function displayActiveProducts() {
     renderProducts(activeProducts, $activeContainer, $activeTemplate);
