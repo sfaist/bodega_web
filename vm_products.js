@@ -1,80 +1,92 @@
 
 $(document).ready(async function () {
-  const products = await fetchProductsFromStores();
+  const availableProducts = await fetchProductsFromStores();
+  const activeProducts = await fetchActiveProducts();
   const itemsPerPage = 20;
   let currentPage = 1;
-  let isLoading = false;
 
-  const memberstack = window.$memberstackDom;
-  const $availabletemplate = $(".availabletemplate");
+  const $availableTemplate = $("#availabletemplate");
+  const $activeTemplate = $("#activetemplate");
   const $availableContainer = $("#availableProducts");
   const $activeContainer = $("#activeProducts");
   const $searchInput = $("#ProductSearch");
 
-  function renderProducts(products, container) {
-    products.forEach((product, index) => {
+  function renderProducts(productsToRender, container, template) {
+    productsToRender.forEach((product, index) => {
       let $productItem;
-      $productItem = $availabletemplate.clone().removeClass("availabletemplate");
+      $productItem = template.clone().removeAttr('id');
       container.append($productItem);
-
       $productItem.find(".p_title").text(product.title);
       $productItem.find(".p_price").text(`$${product.price}`);
       $productItem.find(".p_image-link").attr("src", product.imageLink);
       $productItem.find(".p_store").html(product.store);
       $productItem.find(".p_link").attr("href", product.url);
-      $productItem.find(".activateproduct").on("click", function () {
+      $productItem.find(".toggleproduct").on("click", function () {
         toggleProductActivation($productItem, product);
       });
       $productItem.show();
     });
+    if(productsToRender.length==0)
+      container.find(".nothinghere").show();
+    else 
+      container.find(".nothinghere").hide();
   }
 
   function toggleProductActivation($productItem, product) {
-    const targetContainer = product.active ? $availableContainer : $activeContainer;
-    const buttonText = product.active ? "Add to Store" : "Remove";
+    product.active = !product.active;
     $productItem.fadeOut(300, () => {
-      $productItem.detach().appendTo(targetContainer);
-      //showEmptyTextIfNoActiveProducts();
-      $productItem.find(".activateproduct").text(buttonText);
+      if(product.active){
+        activeProducts.splice(activeProducts.indexOf(product),1);
+        availableProducts.push(product);
+      }
+      else{
+        availableProducts.splice(availableProducts.indexOf(product),1);
+        activeProducts.push(product);
+      }
+      displayActiveProducts();
+      displayAvailableProducts();    
       $productItem.fadeIn(300);
     });
-    product.active= !product.active;
   }
 
-  function loadMoreAvailableProducts() {
-    if (isLoading) return;
-    isLoading = true;
-
+  function displayAvailableProducts() {
     const start = (currentPage - 1) * itemsPerPage;
     const end = currentPage * itemsPerPage;
-    const slicedProducts = products.filter(p=>!p.active).slice(start, end);
+    const slicedProducts = availableProducts.slice(start, end);
 
-    renderProducts(slicedProducts, $availableContainer);
+    renderProducts(slicedProducts, $availableContainer, $availableTemplate);
     currentPage++;
-    isLoading = false;
   }
 
+  function displayActiveProducts() {
+    renderProducts(activeProducts, $activeContainer, $activeTemplate);
+  }
   function isScrollNearBottom() {
     const threshold = 100;
     return ($(window).scrollTop() + $(window).height() > $(document).height() - threshold);
   }
-
   function onScroll() {
     if (isScrollNearBottom()) {
-      loadMoreAvailableProducts();
+      displayAvailableProducts();
     }
   }
   function filterProducts(searchString) {
-    const filteredProducts = products.filter(product => {
-      return product.title.toLowerCase().includes(searchString.toLowerCase());
+    searchString = searchString.toLowerCase();
+    const filteredAvailableProducts = availableProducts.filter(product => {
+      return product.title.toLowerCase().includes(searchString) ||
+            product.url.toLowerCase().includes(searchString);
+    });
+    const filteredActiveProducts = activeProducts.filter(product => {
+      return product.title.toLowerCase().includes(searchString) ||
+            product.url.toLowerCase().includes(searchString);
     });
 
     $availableContainer.empty();
     $activeContainer.empty();
     currentPage = 1;
 
-    renderProducts(filteredProducts.filter(product => !product.active), $availableContainer);
-    renderProducts(filteredProducts.filter(product => product.active), $activeContainer);
+    renderProducts(filteredAvailableProducts, $availableContainer,$availableTemplate);
+    renderProducts(filteredActiveProducts, $activeContainer, $activeTemplate);
   }
 
   $searchInput.on("input", function () {
@@ -82,36 +94,14 @@ $(document).ready(async function () {
     if (searchString.trim() === "") {
       $availableContainer.empty();
       $activeContainer.empty();
-      loadMoreAvailableProducts();
+      displayAvailableProducts();
     } else {
       filterProducts(searchString);
     }
   });
   
   $(window).on("scroll", onScroll);
-  $("savenow").on("scroll", onScroll);
-  loadMoreAvailableProducts();
-
-  async function loadActiveProducts() {
-    data = await memberstack.getAppAndMember();
-    activeProducts = JSON.parse(data.data.member.customFields.activeproducts);
-    activeIDs = activeProducts.map(p=>p.id);
-    products.forEach((p)=>p.active=(p.id in activeIDs));
-    renderProducts(activeProducts, $activeContainer);
-  }
-
-  // Save button
-  async function saveActiveProducts() {
-    const activeProducts = products.filter((product)=>product.active);
-    
-    await memberstack.updateMember({
-      customFields: {
-        activeproducts: JSON.stringify(activeProducts)
-      }
-    })
-    alert("Active products saved successfully!");
-  }
-
-  $("#savebutton").on("click", saveActiveProducts);
-  loadActiveProducts();
+  $("#savebutton").on("click", ()=>saveActiveProducts(activeProducts));
+  displayAvailableProducts();
+  displayActiveProducts();
 });

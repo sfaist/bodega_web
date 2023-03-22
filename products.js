@@ -8,6 +8,7 @@ class Product {
     this.url = url;
   }
 }
+const memberstack = window.$memberstackDom;
 
 // Function to fetch available products from a Shopify store with pagination
 async function fetchAvailableProducts(storeUrl) {
@@ -65,6 +66,21 @@ async function fetchProductsFromStores() {
   }
 
   return allProducts;
+}
+
+async function fetchActiveProducts() {
+  data = await memberstack.getAppAndMember();
+  activeProducts = JSON.parse(data.data.member.customFields.activeproducts);
+  return activeProducts;
+}
+
+// Save button
+async function saveActiveProducts(activeProducts) {  
+  await memberstack.updateMember({
+    customFields: {
+      activeproducts: JSON.stringify(activeProducts)
+    }
+  })
 }
 
 // Fetch and log available products
