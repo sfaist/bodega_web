@@ -8,7 +8,6 @@ class Product {
     this.url = url;
   }
 }
-const memberstack = window.$memberstackDom;
 
 // Function to fetch available products from a Shopify store with pagination
 async function fetchAvailableProducts(storeUrl) {
@@ -69,13 +68,19 @@ async function fetchProductsFromStores() {
 }
 
 async function fetchActiveProducts() {
+  const memberstack = window.$memberstackDom;
   data = await memberstack.getAppAndMember();
-  activeProducts = JSON.parse(data.data.member.customFields.activeproducts);
-  return activeProducts;
+  try{
+    activeProducts = JSON.parse(data.data.member.customFields.activeproducts);
+    return activeProducts;  
+  }
+  catch{}
+  return [];
 }
 
 // Save button
 async function saveActiveProducts(activeProducts) {  
+  const memberstack = window.$memberstackDom;
   await memberstack.updateMember({
     customFields: {
       activeproducts: JSON.stringify(activeProducts)

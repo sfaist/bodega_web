@@ -1,17 +1,17 @@
 
 $(document).ready(async function () {
-  const availableProducts = await fetchProductsFromStores();
-  const activeProducts = await fetchActiveProducts();
-  const itemsPerPage = 20;
-  let currentPage = 1;
+  availableProducts = await fetchProductsFromStores();
+  activeProducts = await fetchActiveProducts();
+  availableProducts=availableProducts.filter((p)=>!(p in activeProducts));
 
-  const $availableTemplate = $("#availabletemplate");
-  const $activeTemplate = $("#activetemplate");
+  const $availableTemplate = $("#availableTemplate");
+  const $activeTemplate = $("#activeTemplate");
   const $availableContainer = $("#availableProducts");
   const $activeContainer = $("#activeProducts");
   const $searchInput = $("#ProductSearch");
 
   function renderProducts(productsToRender, container, template) {
+    container.empty();
     productsToRender.forEach((product, index) => {
       let $productItem;
       $productItem = template.clone().removeAttr('id');
@@ -26,14 +26,9 @@ $(document).ready(async function () {
       });
       $productItem.show();
     });
-    if(productsToRender.length==0)
-      container.find(".nothinghere").show();
-    else 
-      container.find(".nothinghere").hide();
   }
 
   function toggleProductActivation($productItem, product) {
-    product.active = !product.active;
     $productItem.fadeOut(300, () => {
       if(product.active){
         activeProducts.splice(activeProducts.indexOf(product),1);
@@ -43,6 +38,7 @@ $(document).ready(async function () {
         availableProducts.splice(availableProducts.indexOf(product),1);
         activeProducts.push(product);
       }
+      product.active = !product.active;
       displayActiveProducts();
       displayAvailableProducts();    
       $productItem.fadeIn(300);
@@ -50,25 +46,10 @@ $(document).ready(async function () {
   }
 
   function displayAvailableProducts() {
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = currentPage * itemsPerPage;
-    const slicedProducts = availableProducts.slice(start, end);
-
-    renderProducts(slicedProducts, $availableContainer, $availableTemplate);
-    currentPage++;
+    renderProducts(availableProducts, $availableContainer, $availableTemplate);
   }
-
   function displayActiveProducts() {
     renderProducts(activeProducts, $activeContainer, $activeTemplate);
-  }
-  function isScrollNearBottom() {
-    const threshold = 100;
-    return ($(window).scrollTop() + $(window).height() > $(document).height() - threshold);
-  }
-  function onScroll() {
-    if (isScrollNearBottom()) {
-      displayAvailableProducts();
-    }
   }
   function filterProducts(searchString) {
     searchString = searchString.toLowerCase();
@@ -80,11 +61,6 @@ $(document).ready(async function () {
       return product.title.toLowerCase().includes(searchString) ||
             product.url.toLowerCase().includes(searchString);
     });
-
-    $availableContainer.empty();
-    $activeContainer.empty();
-    currentPage = 1;
-
     renderProducts(filteredAvailableProducts, $availableContainer,$availableTemplate);
     renderProducts(filteredActiveProducts, $activeContainer, $activeTemplate);
   }
@@ -92,15 +68,12 @@ $(document).ready(async function () {
   $searchInput.on("input", function () {
     const searchString = $(this).val();
     if (searchString.trim() === "") {
-      $availableContainer.empty();
-      $activeContainer.empty();
+      displayActiveProducts();
       displayAvailableProducts();
     } else {
       filterProducts(searchString);
     }
   });
-  
-  $(window).on("scroll", onScroll);
   $("#savebutton").on("click", ()=>saveActiveProducts(activeProducts));
   displayAvailableProducts();
   displayActiveProducts();
