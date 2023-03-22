@@ -37,7 +37,7 @@ async function fetchAvailableProducts(storeUrl) {
             product.variants[0].price,
             imageLink,
             productsUrl.split('/')[2],
-            productsUrl
+            `${storeUrl}/products/${product.handle}`
           );
         });
 
@@ -69,9 +69,9 @@ async function fetchProductsFromStores() {
 
 async function fetchActiveProducts() {
   const memberstack = window.$memberstackDom;
-  data = await memberstack.getAppAndMember();
+  response = await memberstack.getMemberJSON();
   try{
-    activeProducts = JSON.parse(data.data.member.customFields.activeproducts);
+    activeProducts = response.data.activeproducts;
     return activeProducts;  
   }
   catch{}
@@ -81,11 +81,12 @@ async function fetchActiveProducts() {
 // Save button
 async function saveActiveProducts(activeProducts) {  
   const memberstack = window.$memberstackDom;
-  await memberstack.updateMember({
-    customFields: {
-      activeproducts: JSON.stringify(activeProducts)
+  let output = await memberstack.updateMemberJSON({
+    json: {
+      activeproducts: activeProducts
     }
   })
+  console.log(output);
 }
 
 // Fetch and log available products
