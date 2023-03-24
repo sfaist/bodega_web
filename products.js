@@ -11,7 +11,6 @@ class Product {
 
 // Function to fetch available products from a Shopify store with pagination
 async function fetchAvailableProducts(storeUrl) {
-  const placeholderImage = "https://via.placeholder.com/150";
   let page = 1;
   let hasNextPage = true;
   let availableProducts = [];
@@ -28,9 +27,9 @@ async function fetchAvailableProducts(storeUrl) {
       }
 
       const products = data.products
-        .filter((product) => product.variants.some((variant) => variant.available))
+        .filter((product) => product.variants.some((variant) => variant.available && product.images.length > 0))
         .map((product) => {
-          const imageLink = product.images.length > 0 ? product.images[0].src : placeholderImage;
+          const imageLink = product.images[0].src;
 
           return new Product(
             product.title,
