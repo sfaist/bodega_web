@@ -66,6 +66,7 @@ $(document).ready(()=>{
         askAPI(handle, (response)=>{
             renderProducts(response["products"],$productContainer,$producttemplate);
             $('#styleresult').text(response["style"]);
+            $('#productheadertext').show();
         });
     }
     $('#getrecs').on('click', getStyle);
