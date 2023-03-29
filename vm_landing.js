@@ -20,7 +20,7 @@ $(document).ready(()=>{
         const dataToSend = {
             handle: handle
         };
-        const fakeUpdateInterval = setInterval(displayFakeUpdates, 5000);
+        const fakeUpdateInterval = setInterval(displayFakeUpdates, 8000);
         displayFakeUpdates();
         $.ajax({
             url: 'https://api.onbodega.com/request',
@@ -65,7 +65,10 @@ $(document).ready(()=>{
         $('#styleresult').show();
         askAPI(handle, (response)=>{
             renderProducts(response["products"],$productContainer,$producttemplate);
-            $('#styleresult').text(response["style"]);
+            $('#status').text(response["style"]);
+            $('#profilepic').attr("src", 'https://api.onbodega.com/'+response['profile_picture']["name"].replace("\\","/"));
+            $('#creatorstyle').hide()
+            $('#profilepic').show()
             $('#productheadertext').show();
         });
     }
