@@ -17,17 +17,11 @@ $(document).ready(()=>{
         updateIndex = (updateIndex + 1) % fakeUpdates.length;
     }
     function askAPI(handle, onSuccess){
-        const dataToSend = {
-            handle: handle
-        };
         const fakeUpdateInterval = setInterval(displayFakeUpdates, 8000);
         displayFakeUpdates();
         $.ajax({
-            url: 'https://api.onbodega.com/request',
-            type: 'POST',
-            data: JSON.stringify(dataToSend),
-            contentType: 'application/json',
-            dataType: 'json',
+            url: 'https://api.onbodega.com/get_creator/' + handle,
+            type: 'GET',
             success: function (response) {
                 clearInterval(fakeUpdateInterval);
                 console.log(response);

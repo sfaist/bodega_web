@@ -1,62 +1,26 @@
 $(document).ready(async function () {
-  const $availableTemplate = $("#availableTemplate");
-  const $activeTemplate = $("#activeTemplate");
-  const $availableContainer = $("#availableProducts");
-  const $activeContainer = $("#activeProducts");
+  const $productTemplate = $("#productTemplate");
+  const $productContainer = $("#products");
   const $searchInput = $("#ProductSearch");
   const $sortSelect = $("#ProductSort");
   const $filterSelect = $("#ProductFilter");
   const $username = $("#username");
   const $profilepic = $("#profilepic");
   const $userhandle = $("#userhandle");
-  
+
   creator = new Creator();
   await creator.init();
   displayUserInfo();
   productManager = new ProductManager()
   await productManager.init();
 
-  availableProducts = productManager.availableProducts;
-  activeProducts = productManager.activeProducts;
-
-
-  // Set up drag-and-drop functionality
-  $(".product-list").sortable({
-    connectWith: ".connectedsortable",
-    handle: ".product-dragger",
-    start: function (event, ui) {
-      ui.item.addClass("dragging");
-    },
-    stop: function (event, ui) {
-      ui.item.removeClass("dragging");
-    },
-    over: function (event, ui) {
-      $(this).addClass("highlight");
-    },
-    out: function (event, ui) {
-      $(this).removeClass("highlight");
-    },
-    receive: function (event, ui) {
-      const product = ui.item.data("product");
-      const isActive = $(this).hasClass("active-products");
-
-      if (isActive) {
-        availableProducts.splice(availableProducts.indexOf(product), 1);
-        activeProducts.push(product);
-      } else {
-        activeProducts.splice(activeProducts.indexOf(product), 1);
-        availableProducts.push(product);
-      }
-
-      product.active = isActive;
-    },
-  });
-  
+  products = productManager.products;
 
   // Display user
   function displayUserInfo() {
     $userhandle.text(`@${creator.handle}`);
-    $profilepic.attr("src", creator.profile_picture);
+    $profilepic.attr("src", 'https://api.onbodega.com/'+creator.profile_picture["name"].replace("\\","/"));
+    $profilepic.attr("srcset", "");
     $username.text(creator.name);
   }
 
@@ -73,14 +37,14 @@ $(document).ready(async function () {
       $productItem.find(".p_image-link").attr("src", product.image);
       $productItem.find(".p_store").html(product.store);
       $productItem.find(".p_link").attr("href", product.url);
+      $productItem.toggleClass("active", product.active);
       $productItem.show();
     });
   }
 
   // Display products
   function displayProducts() {
-    renderProducts(availableProducts, $availableContainer, $availableTemplate);
-    renderProducts(activeProducts, $activeContainer, $activeTemplate);
+    renderProducts(products, $productContainer, $productTemplate);
   }
 
   // Search, sort, and filter products
@@ -89,26 +53,21 @@ $(document).ready(async function () {
     const sortValue = $sortSelect.val();
     const filterValue = $filterSelect.val();
 
-    let filteredAvailableProducts = availableProducts;
-    let filteredActiveProducts = activeProducts;
+    let filteredProducts = products;
 
     if (searchString.trim() !== "") {
-      filteredAvailableProducts = filterProducts(filteredAvailableProducts, searchString);
-      filteredActiveProducts = filterProducts(filteredActiveProducts, searchString);
+      filteredProducts = filterProducts(filteredProducts, searchString);
     }
 
     if (sortValue !== "default") {
-      filteredAvailableProducts = sortProducts(filteredAvailableProducts, sortValue);
-      filteredActiveProducts = sortProducts(filteredActiveProducts, sortValue);
+      filteredProducts = sortProducts(filteredProducts, sortValue);
     }
 
     if (filterValue !== "all") {
-      filteredAvailableProducts = filterProductsByCategory(filteredAvailableProducts, filterValue);
-      filteredActiveProducts = filterProductsByCategory(filteredActiveProducts, filterValue);
+      filteredProducts = filterProductsByCategory(filteredProducts, filterValue);
     }
 
-    renderProducts(filteredAvailableProducts, $availableContainer, $availableTemplate);
-    renderProducts(filteredActiveProducts, $activeContainer, $activeTemplate);
+    renderProducts(filteredProducts, $productContainer, $productTemplate);
   }
 
   function filterProducts(products, searchString) {
@@ -139,28 +98,34 @@ $(document).ready(async function () {
   function filterProductsByCategory(products, filterValue) {
     return products.filter(product => product.store === filterValue);
   }
-
   // Event listeners
   $searchInput.on("input", updateProductDisplay);
   $sortSelect.on("change", updateProductDisplay);
   $filterSelect.on("change", updateProductDisplay);
+  $productContainer.on("click", ".product-toggle", function () {
+    const $productItem = $(this).closest(".product-item");
+    const product = $productItem.data("product");
+
+    product.active = !product.active;
+    $productItem.toggleClass("active", product.active);
+  });
+
   $("#savebutton").on("click", async () => {
     result = await productManager.saveActiveProducts();
     if (result) {
-      originalButtonText = $("#savebutton").textContent
-      $("#savebutton").html = "Successful!";
-      setTimeout((originalButtonText) => {
-        $("#savebutton").html = originalButtonText;
-      }, 5000); // Revert the button text back to the original after 5 seconds
-    } 
-    else{
-      $("#savebutton").html = "Something went wrong";
-      $("#savebutton").color = "#DD2222";
+      originalButtonText = $("#savebutton").textContent;
+      $("#savebutton").text("Successful!");
       setTimeout(() => {
-        $("#savebutton").html = originalButtonText;
+        $("#savebutton").text(originalButtonText);
       }, 5000); // Revert the button text back to the original after 5 seconds
+    } else {
+      $("#savebutton").text("Something went wrong");
+      $("#savebutton").css("color", "#DD2222");
+      setTimeout(() => {
+        $("#savebutton").text(originalButtonText);
+        $("#savebutton").css("color", "");
+      }, 5000); // Revert the button text and color back to the original after 5 seconds
     }
-  
   });
 
   // Initial display
